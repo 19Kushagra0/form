@@ -26,10 +26,20 @@ export default function Create() {
 
     console.log(formData);
 
-    await fetch("/api/backend", {
+    const response = await fetch("/api/backend", {
       method: "POST",
       body: JSON.stringify({ createData: formData }),
     });
+    const data = await response.json();
+
+    if (response.status === 400 && data.message === "Username already exists") {
+      const usernameInput = document.querySelector("input[name='userName']");
+      usernameInput.setCustomValidity("Username already exists");
+      usernameInput.reportValidity(); // force the popup to show
+      return; // stop here and do NOT clear the form
+    }
+
+    console.log(data);
 
     // clear form
     setFormData({
@@ -54,6 +64,7 @@ export default function Create() {
             required
             value={formData.userName}
             onChange={handleChange}
+            onInput={(e) => e.target.setCustomValidity("")} // <- THIS CLEARS THE OLD ERROR
           />
         </label>
 
